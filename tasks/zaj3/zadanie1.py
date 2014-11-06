@@ -18,7 +18,17 @@ def load_data(path):
     :return: Lista dwuelementowych krotek, pierwszym elementem jest ngram, drugim
     ilość wystąpień ngramu
     """
+    import csv
+    data = []
 
+    with open(path, 'r') as f:
+        r = csv.reader(f, dialect=csv.unix_dialect)
+        for line in r:
+            # assert isinstance(line, object)
+            # print (line[0], int(line[1]))
+            data.append( (line[0], int(line[1])) )
+
+    return data
 
 def suggester(input, data):
     """
@@ -75,3 +85,39 @@ def suggester(input, data):
      ('e', 0.07352941176470588),
      ('i', 0.014705882352941176)]
     """
+    from collections import defaultdict
+    import operator
+
+    counter = defaultdict(lambda : 0)
+    # counter[ii]+=1
+
+    for ngram, frq in data:
+        pos = ngram.find(input)
+        # print(pos)
+        if(pos == 0):
+            try:
+                # print(ngram[len(input):len(input)+1])
+                counter[ngram[len(input):len(input)+1]]+=frq
+
+            except:
+                print("dupa")
+            # if(input in ngram):
+    sum_ = sum( counter.values() )
+
+    pstwo = list()
+    for key, value in counter.items():
+        pstwo.append( (key, value/sum_) )
+
+
+
+    return sorted(pstwo, key=operator.itemgetter(1), reverse=True )
+
+
+
+# data = load_data('/home/kinkuro/Studia/Doktorat/Python/zaj3/enwiki-20140903-pages-articles_part_2.xmlascii1000.csv')
+# data = [list(data[0]), list(data[1])]
+# data = [ ("olapython", 10), ("python", 2), ("pyt", 8), ("pythob", 3)]
+# prob = suggester('jud', data)
+
+# print(prob)
+
