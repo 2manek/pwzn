@@ -114,10 +114,10 @@ def suggester(input, data):
 
 
 
-# data = load_data('/home/kinkuro/Studia/Doktorat/Python/zaj3/enwiki-20140903-pages-articles_part_2.xmlascii1000.csv')
+data = load_data('/home/kinkuro/Studia/Doktorat/Python/zaj3/enwiki-20140903-pages-articles_part_2.xmlascii1000.csv')
 # data = [list(data[0]), list(data[1])]
 # data = [ ("olapython", 10), ("python", 2), ("pyt", 8), ("pythob", 3)]
-# prob = suggester('jud', data)
+prob = suggester('pytho', data)
 
-# print(prob)
+print(prob)
 
