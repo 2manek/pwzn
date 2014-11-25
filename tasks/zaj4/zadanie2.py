@@ -26,8 +26,22 @@ def calculate_neighbours(board):
     których ma każda z komórek w macierzy, następnie liczymy ilość sąsiadów
     prawych itp.
 
-    Podpowiedź II: Proszę uważać na komówki na bokach i rogach planszy.
+    Podpowiedź II: Proszę uważać na komórki na bokach i rogach planszy.
     """
+    N, M = board.shape
+
+    tmp = np.zeros((N, M))
+    tmp[:, :-1] += board[:, 1:]
+    tmp[:, 1:] += board[:, :-1]
+    tmp[:-1, :] += board[1:, :]
+    tmp[1:, :] += board[:-1, :]
+
+    tmp[:-1, :-1] += board[1:, 1:]
+    tmp[1:, 1:] += board[:-1, :-1]
+    tmp[1:, :-1] += board[:-1, 1:]
+    tmp[:-1, 1:] += board[1:, :-1]
+
+    return tmp
 
 
 def iterate(board):
@@ -49,3 +63,12 @@ def iterate(board):
     oznacza to że dana komórka jest obsadzona
 
     """
+    tmp = np.array(board.shape)
+
+    b = np.array(board, dtype=int)
+    b = calculate_neighbours(b)
+
+    tmp = np.logical_and(board == False, b==3)
+    tmp = np.logical_or(tmp, np.logical_and(board  == True, np.logical_and(b>=2, b<=3)))
+
+    return tmp
