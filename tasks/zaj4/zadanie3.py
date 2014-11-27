@@ -34,31 +34,16 @@ class Integrator(object):
 
     """
 
-    PARAMS = {
-        2: [1, 1],
-        3: [1, 3, 1],
-        4: [1, 3, 3, 1],
-        5: [7, 32, 12, 32, 7],
-        6: [19, 75, 50, 50, 75, 19],
-        7: [41, 216, 27, 272, 27, 216, 41],
-        8: [751, 3577, 1323, 2989, 2989, 1323, 3577, 751],
-        9: [989, 5888, -928, 10496, -4540, 10496, -928, 5888, 989],
-        10: [None] * 10,
-        11: [None] * 11
-    }
-
-    PARAMS[10][0] = PARAMS[10][-1] = 2857
-    PARAMS[10][1] = PARAMS[10][-2] = 15741
-    PARAMS[10][2] = PARAMS[10][-3] = 1080
-    PARAMS[10][3] = PARAMS[10][-4] = 19344
-    PARAMS[10][4] = PARAMS[10][-5] = 5778
-
-    PARAMS[11][0] = PARAMS[11][-1] = 16067
-    PARAMS[11][1] = PARAMS[11][-2] = 106300
-    PARAMS[11][2] = PARAMS[11][-3] = -48525
-    PARAMS[11][3] = PARAMS[11][-4] = 272400
-    PARAMS[11][4] = PARAMS[11][-5] = -260550
-    PARAMS[11][5] = 427368
+    tab_coeff = {2:[1, 1],
+                 3:[1,4,1],
+                 4:[1,3,3,1],
+                 5:[7,32,12,32,7],
+                 6:[19,75,50,50,75,19],
+                 7:[41,216,27,272,27,216,41],
+                 8:[751,3577,1323,2989,2989,1323,3577,751],
+                 9:[989,5888,-928,10496,-4540,10496,-928,5888,989],
+                 10:[2857,15741,1080,19344,5778,5778,19344,1080,15741,2857],
+                 11:[16067,106300,-48525,272400,-260550,427368,-260550,272400,-48525,106300,16067]}
 
     def __init__(self, level):
         """
@@ -68,6 +53,22 @@ class Integrator(object):
         """
         self.level = level
 
+    @classmethod
+    def get_level_parameters(cls, level):
+        """
+       
+        :param int level: Liczba całkowita większa od jendości.
+        :return: Zwraca listę współczynników dla poszczególnych puktów
+                 w metodzie NC. Na przykład metoda NC stopnia 2 używa punktów
+                 na początku i końcu przedziału i każdy ma współczynnik 1,
+                 więc metoda ta zwraca [1, 1]. Dla NC 3 stopnia będzie to
+                 [1, 3, 1] itp.
+        :rtype: List of integers
+        """
+        if level < 2: raise ValueError
+        
+        return np.array(cls.tab_coeff.get(level)) 
+
     def integrate(self, func, func_range, num_evaluations):
         """
 
@@ -76,32 +77,24 @@ class Integrator(object):
         :param in tnum_evaluations:
         :return:
         """
+        coeff = self.get_level_parameters(self.level)
+        _range = math.ceil(num_evaluations/self.level)
 
-        parts = math.ceil(num_evaluations/self.level)
+        a, b = func_range
+        step = (b-a) / ((self.level-1)*(_range))
+        tab = np.arange(a, b, step)
 
-        new_evaluations = int(parts * (self.level-1))
-
-        start, stop = func_range
-
-        grid = np.linspace(start, stop, new_evaluations, endpoint=False)
-
-        value_grid = np.zeros((parts, self.level))
-
-        value_grid[:, :-1] = grid.reshape((parts, self.level-1))
-        value_grid[:-1, -1] = value_grid[1:, 0]
-        value_grid.flat[-1] = stop
-
-        # print(value_grid)
-
-        value_grid = func(value_grid)
-
-        coefficients = np.asanyarray(self.PARAMS[self.level], dtype=float)
-
-        res = np.sum(value_grid * coefficients[np.newaxis, :])
-
-        return res / np.sum(coefficients) * (stop - start) / parts
+        tmp = np.zeros((_range, self.level))
+        tmp[:,:-1]  = tab.reshape((_range, self.level-1))
+        tmp[:-1,-1] = tmp[1:,0]
+        tmp[-1,-1]  = b
+            
+        h = (b-a)/_range
+        tmp = func(tmp)*coeff
+        return sum(sum(tmp))/sum(coeff)*h
 
 if __name__ == "__main__":
 
-    ii = Integrator(level=7)
-    print(ii.integrate(np.sin, (0, np.pi), 30))
+    ii = Integrator(level=2)
+    # tmp = ii.integrate(np.sin, (0, np.pi), 30)
+    print(ii.integrate(np.sin, (0, np.pi), 300))

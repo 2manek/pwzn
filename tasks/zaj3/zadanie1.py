@@ -24,8 +24,6 @@ def load_data(path):
     with open(path, 'r') as f:
         r = csv.reader(f, dialect=csv.unix_dialect)
         for line in r:
-            # assert isinstance(line, object)
-            # print (line[0], int(line[1]))
             data.append( (line[0], int(line[1])) )
 
     return data
@@ -117,10 +115,10 @@ def suggester(input, data):
 
 
 
-data = load_data('/home/kinkuro/Studia/Doktorat/Python/zaj3/enwiki-20140903-pages-articles_part_2.xmlascii1000.csv')
+# data = load_data('/home/kinkuro/Studia/Doktorat/Python/zaj3/enwiki-20140903-pages-articles_part_2.xmlascii1000.csv')
 # data = [list(data[0]), list(data[1])]
 # data = [ ("olapython", 10), ("python", 2), ("pyt", 8), ("pythob", 3)]
-prob = suggester('pytho', data)
+# prob = suggester('pytho', data)
 
-print(prob)
+# print(prob)
 
