@@ -94,7 +94,6 @@ class Integrator(object):
         return sum(sum(tmp))/sum(coeff)*h
 
 if __name__ == "__main__":
-
-    ii = Integrator(level=2)
-    # tmp = ii.integrate(np.sin, (0, np.pi), 30)
-    print(ii.integrate(np.sin, (0, np.pi), 300))
+≡jedi=0, ≡                   (*level*) ≡jedi≡
+    ii = Integrator(level=7)
+    print(ii.integrate(np.sin, (0, np.pi), 30))
