@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from numpy import char
-
+import mmap
+import struct
 import numpy as np
 
 def next_item(input):
@@ -28,6 +29,12 @@ def load_data(path):
     Typ danych jest złożony --- należy użyć Structured Array.
     """
 
+    dtype = np.dtype([
+        ('ngram', np.dtype("a7")),
+        ('count', np.int32)])
+
+    return np.memmap(path, dtype=dtype)
+    # return data
 
 def suggester(input, data):
     """
@@ -59,9 +66,42 @@ def suggester(input, data):
     []
     >>> suggester('pytho', data)
     [('n', 1.0)]
-    >>> suggester('pytho', data)
+    >>> suggester('pyth', data)
     [('o', 0.7794117647058824),
      ('a', 0.1323529411764706),
      ('e', 0.07352941176470588),
      ('i', 0.014705882352941176)]
     """
+    from collections import defaultdict
+    import operator
+
+    counter = defaultdict(lambda : 0)
+    # counter[ii]+=1
+    # np.where(data["ngram"]
+    for ngram, frq in data:
+        pos = ngram.decode('utf-8').find(input)
+        # print(pos)
+        if(pos == 0):
+            try:
+                counter[ngram[len(input):len(input)+1]]+=frq
+            except:
+                print("dupa")
+    sum_ = sum( counter.values() )
+
+    pstwo = list()
+    for key, value in counter.items():
+        pstwo.append( ((key.decode()), value/sum_) )
+    import operator
+    return sorted(pstwo, key=operator.itemgetter(1), reverse=True)
+    # print(pstwo[0][0], pstwo[0][1])
+    # print(pstwo[-1][0], pstwo[-1][1])
+    #
+    # print(pstwo)
+
+
+# path = '/home/kinkuro/Studia/Doktorat/Python/zaj4/enwiki-20140903-pages-articles_part_0.xmlascii.bin'
+# data = load_data(path)
+# print(data["ngram"][1])
+# print([ ch for ch in data["count"][:200] ])
+# s = suggester(' ', data[:1000])
+# print(struct.unpack('7cI', data[:12]))

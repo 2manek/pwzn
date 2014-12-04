@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from . import utils
+# from . import utils
 import mmap
 import numpy as np
 import os
-from solutions.zaj5.utils import create_dtype
+# from solutions.zaj5.utils import create_dtype
 
 
 class InvalidFormatError(IOError):
@@ -69,3 +69,51 @@ def load_data(filename):
 
     W zadaniu 3 będziecie na tym pliku robić obliczenia.
     """
+    import struct
+    import mmap
+
+    s = struct.Struct("<16c3h2i")
+
+    if s.size >= (os.path.getsize(filename)):
+        raise InvalidFormatError()
+
+    with open(filename, 'rb') as f:
+        data = mmap.mmap(f.fileno(), 0, mmap.MAP_SHARED, mmap.PROT_READ)
+
+        tut = s.unpack(data[0 : s.size])
+
+        struct_size = tut[18]
+        data_size = tut[19]
+        data_offset = tut[20]
+
+        filesize = data_offset + struct_size*data_size
+
+        if not filesize == (os.path.getsize(filename)):
+            raise InvalidFormatError()
+        # print(tut[16])
+        if not tut[16] == 3:
+            raise InvalidFormatError()
+
+        # if not tut[17] == 4:
+        #     raise InvalidFormatError()
+
+        magic = (b'6', b'o', b'\xfd', b'o', b'\xe2', b'\xa4', b'C', b'\x90', b'\x98', b'\xb2', b't', b'!', b'\xbe', b'u', b'r', b'n')
+        for i, j in zip(magic, tut[0:16]):
+            if not i == j: raise InvalidFormatError()
+
+    # print("size", struct_size)
+    pad = struct_size - 30
+    dtype = np.dtype([
+    ("event_id", np.uint16),
+    ('position', np.dtype("3float32")),
+    ('mass', np.dtype("float32")),
+    ('velocity', np.dtype("3float32")),
+    ('pad', np.dtype("%ia" % pad ))
+    ])
+
+    data = np.memmap(filename, dtype=dtype, offset=data_offset)
+    # print(data["event_id"][0])
+    return data
+
+path = '/home/kinkuro/Studia/Doktorat/Python/zaj4/zadA'
+load_data(path)
